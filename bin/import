@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -o pipefail -o errtrace -o errexit -o nounset
+shopt -s inherit_errexit
+
+clean
+
+cp open-flights-data/*.dat docker/import/
+
+echo 'id:ID,name,city,country,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE' \
+     >docker/import/airports-header.dat
+echo ':IGNORE,:IGNORE,:IGNORE,:START_ID,:IGNORE,:END_ID,:IGNORE,:IGNORE,:IGNORE' \
+     >docker/import/routes-header.dat
+
+docker run \
+       --rm \
+       --name=holidays \
+       --volume="$(pwd)"/docker/data:/data \
+       --volume="$(pwd)"/docker/import:/import \
+       neo4j:4.0 \
+       neo4j-admin import --ignore-extra-columns=true --bad-tolerance=0 \
+       --report-file=/data/import.report --skip-duplicate-nodes=true \
+       --skip-bad-relationships=true \
+       --nodes=Airport=/import/airports-header.dat,/import/airports.dat \
+       --relationships=FLIGHT=/import/routes-header.dat,/import/routes.dat
+
+docker run \
+       --detach \
+       --name=holidays \
+       --publish=7474:7474 --publish=7687:7687 \
+       --volume="$(pwd)"/docker/data:/data \
+       --volume="$(pwd)"docker/import:/import \
+       --env NEO4J_AUTH=none \
+       neo4j:4.0
+
+while ! docker exec --interactive holidays bin/cypher-shell 'RETURN 1;'; do
+    sleep 1
+done
+
+docker exec --interactive holidays bin/cypher-shell <<EOF
+MATCH (a:Airport)
+    WHERE NOT (a) -[:FLIGHT]- (:Airport)
+    DELETE a;
+
+MATCH (a:Airport)
+    MERGE (city:City {name: a.city, country: a.country})
+    MERGE (a) -[:IN]-> (city)
+    REMOVE a.city, a.country, a.id;
+
+MATCH (city:City)
+    MERGE (country:Country {name: city.country})
+    MERGE (city) -[:IN]-> (country)
+    REMOVE city.country;
+
+MATCH (a1:Airport) -[r:FLIGHT]-> (a2:Airport)
+WITH a1, a2, collect(r) as rs
+WHERE size(rs) > 1
+WITH rs
+foreach(r in tail(rs) | DELETE r);
+
+MATCH (c:City {name: "Doncaster, Sheffield"}) set c.name = "Sheffield";
+EOF

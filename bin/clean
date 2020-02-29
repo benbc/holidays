@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -o pipefail -o errtrace -o errexit -o nounset
+shopt -s inherit_errexit
+
+docker rm --force --volumes holidays || true
+sudo rm -rf docker
+mkdir -p docker/import
