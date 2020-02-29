@@ -51,11 +51,20 @@ MATCH (city:City)
     MERGE (city) -[:IN]-> (country)
     REMOVE city.country;
 
-MATCH (a1:Airport) -[r:FLIGHT]-> (a2:Airport)
-WITH a1, a2, collect(r) as rs
-WHERE size(rs) > 1
-WITH rs
-foreach(r in tail(rs) | DELETE r);
+MATCH (c1:City) <-[:IN]- (a1:Airport) -[:FLIGHT]-> (a2:Airport) -[:IN]-> (c2:City)
+    MERGE (c1) -[:FLIGHT]-> (c2);
+
+MATCH (a1:Airport) -[f:FLIGHT]-> (a2:Airport)
+WITH a1, a2, collect(f) as fs
+WHERE size(fs) > 1
+WITH fs
+foreach(f in tail(fs) | DELETE f);
+
+MATCH (c1:City) -[f:FLIGHT]-> (c2:City)
+WITH c1, c2, collect(f) as fs
+WHERE size(fs) > 1
+WITH fs
+foreach(f in tail(fs) | DELETE f);
 
 MATCH (c:City {name: "Doncaster, Sheffield"}) set c.name = "Sheffield";
 EOF
