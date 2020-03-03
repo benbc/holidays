@@ -10,29 +10,57 @@ Graph database
 Run Browser
 
 Simple graph building
-     CREATE (:Person {name: "Ben Butler-Cole", age: 44})
-     MATCH (me:Person {name: "Ben Butler-Cole"}) RETURN me.age
+     Draw everything as pictures on the board
+     Keep glossary as you go
+     Introduce Cypher patterns as ascii-art
+
+CREATE (:Person {name: "Ben Butler-Cole", age: 44})
+MATCH (me:Person {name: "Ben Butler-Cole"}) RETURN me.age
 
      Check what towns people are from for duplicates (Derby, Uttoxeter, Burton okay)
 
-     CREATE (:Town {name: "Plymouth"})
-     MATCH (t:Town {name: "Plymouth"}) RETURN t
+CREATE (:Town {name: "Plymouth"})
+MATCH (t:Town {name: "Plymouth"}) RETURN t
 
      For people who see more than one result
           MATCH (t:Town {name: "Plymouth"}) DELETE t
           MERGE (:Town {name: "Plymouth"})
 
-     MATCH (t:Town {name: "Plymouth"})
-     MATCH (p:Person {name: "Ben Butler-Cole"})
-     CREATE (p)-[:LIVES]->(t)
+MATCH (t:Town {name: "Plymouth"}), (p:Person {name: "Ben Butler-Cole"})
+CREATE (p)-[:LIVES]->(t)
 
-     MATCH (c:Country {name: "United Kingdom"}) return c
+MATCH (c:Country {name: "United Kingdom"}) return c
 
-     MATCH (t:Town {name: "Plymouth"})
-     MATCH (c:Country {name: "United Kingdom"})
-     MERGE (t)-[:IN]->(c)
+MATCH (t:Town {name: "Plymouth"}), (c:Country {name: "United Kingdom"})
+MERGE (t)-[:IN]->(c)
 
-     MATCH (:Person {name: "Ben Butler-Cole"})-[:LIVES]->(t:Town) RETURN t.name
-     MATCH (:Person {name: "Ben Butler-Cole"})-[:LIVES]->(:Town)<-[:LIVES]-(p:Person) RETURN p.name
-     MATCH (:Country {name: "United Kingdom"})<-[:IN]-(t:Town)<-[:LIVES]-(p:Person) RETURN t.name, p.name ORDER BY t.name
+MATCH (:Person {name: "Ben Butler-Cole"})-[:LIVES]->(t:Town) RETURN t.name
+MATCH (:Town {name: "Plymouth"})<-[:LIVES]-(p:Person) RETURN p.name
+MATCH (:Person {name: "Ben Butler-Cole"})-[:LIVES]->(:Town)<-[:LIVES]-(p:Person) RETURN p.name
+
+MATCH (:Country {name: "United Kingdom"})<-[:IN]-(t:Town)<-[:LIVES]-(p:Person)
+WITH t.name as town, collect(p.name) as inhabitants
+RETURN town, inhabitants ORDER BY size(inhabitants) DESC
      
+MATCH (:Town {name: "Sheffield"})-[:FLIGHT]->(t:Town) RETURN t.name
+MATCH (:Town {name: "Sheffield"})-[:FLIGHT]->(t:Town)-[:IN]->(c:Country) RETURN t.name, c.name
+MATCH route=(:Town {name: "Sheffield"})-[:FLIGHT]->(:Town) RETURN route
+
+MATCH (:Town {name: "Sheffield"})-[:FLIGHT]->(town:Town)-[:IN]->(country:Country) 
+WITH country, collect(town) as towns RETURN country.name as country, size(towns) as number_of_towns ORDER BY size(towns) DESC LIMIT 10;
+
+MATCH (:Town {name: "London"})-[:FLIGHT]->(t:Town)-[:IN]->(:Country {name: "South Africa"}) return t.name
+MATCH route=(:Country {name: "United Kingdom"})<-[:IN]-(:Town)-[:FLIGHT]->(:Town)-[:IN]->(:Country {name: "South Africa"}) RETURN route
+
+MATCH route=(:Country {name: "United Kingdom"})<-[:IN]-(:Town)-[:FLIGHT]->(:Town)-[:IN]->(:Country {name: "Indonesia"}) RETURN route
+MATCH route=(:Country {name: "United Kingdom"})<-[:IN]-(:Town)-[:FLIGHT*1..2]->(:Town)-[:IN]->(:Country {name: "Indonesia"}) RETURN route LIMIT 6
+
+MATCH (me:Person {name: "Ben Butler-Cole"}), (c:Country {name: "South Africa"})
+CREATE (me)-[:LIKES]->(c)
+
+MATCH (me:Person {name: "Ben Butler-Cole"})-[:LIKES]->(c:Country)
+MATCH route = (:Town {name: "Manchester"})-[:FLIGHT*1..3]->(:Town)-[:IN]->(c)
+RETURN route ORDER BY length(route) LIMIT 6
+
+MATCH (:Person {name: "Ben Butler-Cole"})-[:LIKES]->(c1:Country)<-[:LIKES]-(:Person)-[:LIKES]->(c2:Country)
+RETURN c2.name
