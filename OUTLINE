@@ -1,0 +1,38 @@
+What is a database?
+     Real-world examples
+     Different kinds
+
+Graph database
+     All about relationships
+     Terminology (nodes, relationships)
+     Examples of graphs
+
+Run Browser
+
+Simple graph building
+     CREATE (:Person {name: "Ben Butler-Cole", age: 44})
+     MATCH (me:Person {name: "Ben Butler-Cole"}) RETURN me.age
+
+     Check what towns people are from for duplicates (Derby, Uttoxeter, Burton okay)
+
+     CREATE (:Town {name: "Plymouth"})
+     MATCH (t:Town {name: "Plymouth"}) RETURN t
+
+     For people who see more than one result
+          MATCH (t:Town {name: "Plymouth"}) DELETE t
+          MERGE (:Town {name: "Plymouth"})
+
+     MATCH (t:Town {name: "Plymouth"})
+     MATCH (p:Person {name: "Ben Butler-Cole"})
+     CREATE (p)-[:LIVES]->(t)
+
+     MATCH (c:Country {name: "United Kingdom"}) return c
+
+     MATCH (t:Town {name: "Plymouth"})
+     MATCH (c:Country {name: "United Kingdom"})
+     MERGE (t)-[:IN]->(c)
+
+     MATCH (:Person {name: "Ben Butler-Cole"})-[:LIVES]->(t:Town) RETURN t.name
+     MATCH (:Person {name: "Ben Butler-Cole"})-[:LIVES]->(:Town)<-[:LIVES]-(p:Person) RETURN p.name
+     MATCH (:Country {name: "United Kingdom"})<-[:IN]-(t:Town)<-[:LIVES]-(p:Person) RETURN t.name, p.name ORDER BY t.name
+     

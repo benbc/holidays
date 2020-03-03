@@ -1,7 +1,7 @@
-MATCH (:Country {name: "United Kingdom"}) -[:IN]- (uk:City)
-MATCH (:Country {name: "India"}) -[:IN]- (other:City)
+MATCH (:Country {name: "United Kingdom"}) -[:IN]- (uk:Town)
+MATCH (:Country {name: "India"}) -[:IN]- (other:Town)
 MATCH route = (uk) -[:FLIGHT*1..2]-> (other)
 RETURN route ORDER BY length(route) LIMIT 10;
 
-MATCH (:City {name: "Sheffield"}) -[:FLIGHT]-> (city:City) -[:IN]- (country:Country) 
-WITH country, collect(city) as cities RETURN country.name as country, size(cities) as number_of_cities ORDER BY size(cities) DESC LIMIT 6;
+MATCH (:Town {name: "Sheffield"}) -[:FLIGHT]-> (town:Town) -[:IN]- (country:Country) 
+WITH country, collect(town) as towns RETURN country.name as country, size(towns) as number_of_towns ORDER BY size(towns) DESC LIMIT 6;

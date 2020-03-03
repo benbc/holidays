@@ -6,7 +6,7 @@ clean
 
 cp open-flights-data/*.dat docker/import/
 
-echo 'id:ID,name,city,country,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE' \
+echo 'id:ID,name,town,country,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE,:IGNORE' \
      >docker/import/airports-header.dat
 echo ':IGNORE,:IGNORE,:IGNORE,:START_ID,:IGNORE,:END_ID,:IGNORE,:IGNORE,:IGNORE' \
      >docker/import/routes-header.dat
@@ -42,17 +42,17 @@ MATCH (a:Airport)
     DELETE a;
 
 MATCH (a:Airport)
-    MERGE (city:City {name: a.city, country: a.country})
-    MERGE (a) -[:IN]-> (city)
-    REMOVE a.city, a.country, a.id;
+    MERGE (town:Town {name: a.town, country: a.country})
+    MERGE (a) -[:IN]-> (town)
+    REMOVE a.town, a.country, a.id;
 
-MATCH (city:City)
-    MERGE (country:Country {name: city.country})
-    MERGE (city) -[:IN]-> (country)
-    REMOVE city.country;
+MATCH (town:Town)
+    MERGE (country:Country {name: town.country})
+    MERGE (town) -[:IN]-> (country)
+    REMOVE town.country;
 
-MATCH (c1:City) <-[:IN]- (a1:Airport) -[:FLIGHT]-> (a2:Airport) -[:IN]-> (c2:City)
-    MERGE (c1) -[:FLIGHT]-> (c2);
+MATCH (t1:Town) <-[:IN]- (a1:Airport) -[:FLIGHT]-> (a2:Airport) -[:IN]-> (t2:Town)
+    MERGE (t1) -[:FLIGHT]-> (t2);
 
 MATCH (a1:Airport) -[f:FLIGHT]-> (a2:Airport)
 WITH a1, a2, collect(f) as fs
@@ -60,11 +60,12 @@ WHERE size(fs) > 1
 WITH fs
 foreach(f in tail(fs) | DELETE f);
 
-MATCH (c1:City) -[f:FLIGHT]-> (c2:City)
-WITH c1, c2, collect(f) as fs
+MATCH (t1:Town) -[f:FLIGHT]-> (t2:Town)
+WITH t1, t2, collect(f) as fs
 WHERE size(fs) > 1
 WITH fs
 foreach(f in tail(fs) | DELETE f);
 
-MATCH (c:City {name: "Doncaster, Sheffield"}) set c.name = "Sheffield";
+MATCH (t:Town {name: "Doncaster, Sheffield"}) set t.name = "Sheffield";
+MATCH (t:Town {name: "Derby"}) DETACH DELETE "Derby"
 EOF
