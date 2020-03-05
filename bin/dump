@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -o pipefail -o errtrace -o errexit -o nounset
+shopt -s inherit_errexit
+
+docker stop holidays
+
+docker run \
+       --rm \
+       --name=holidays \
+       --volume="$(pwd)"/docker/data:/data \
+       neo4j:3.5 \
+       neo4j-admin dump --to=/data/holidays.dump
