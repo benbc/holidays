@@ -14,6 +14,8 @@ Simple graph building
      Keep glossary as you go
      Introduce Cypher patterns as ascii-art
 
+https://neo4j.com/docs/cypher-manual/current/
+
 CREATE (:Person {name: "Ben Butler-Cole", age: 44})
 MATCH (me:Person {name: "Ben Butler-Cole"}) RETURN me.age
 
@@ -29,7 +31,7 @@ MATCH (t:Town {name: "Plymouth"}) RETURN t
 MATCH (t:Town {name: "Plymouth"}), (p:Person {name: "Ben Butler-Cole"})
 CREATE (p)-[:LIVES]->(t)
 
-MATCH (c:Country {name: "United Kingdom"}) return c
+MATCH (c:Country {name: "United Kingdom"}) RETURN c
 
 MATCH (t:Town {name: "Plymouth"}), (c:Country {name: "United Kingdom"})
 MERGE (t)-[:IN]->(c)
@@ -64,3 +66,21 @@ RETURN route ORDER BY length(route) LIMIT 6
 
 MATCH (:Person {name: "Ben Butler-Cole"})-[:LIKES]->(c1:Country)<-[:LIKES]-(:Person)-[:LIKES]->(c2:Country)
 RETURN c2.name
+
+What city connects directly to most other cities?
+MATCH route=(t:Town)-[FLIGHT]->(:Town)
+WITH t, size(collect(route)) as flights
+RETURN t.name, flights ORDER BY flights DESC LIMIT 10
+
+Which country has most routes flying to India?
+MATCH route=(c:Country) <-[:IN]- (:Town) -[:FLIGHT]-> (:Town) -[:IN]-> (:Country {name: "India"}) WITH c.name AS city, size(collect(route)) as routes RETURN city, routes ORDER BY routes DESC LIMIT 10
+What about two-leg flights?
+
+Which city has most routes flying to countries you like? (Where should you move to?)
+MATCH route=(t:Town) -[:FLIGHT]-> (:Town) -[:IN]-> (c:Country) <-[:LIKES]-(me:Person {name: "Ben Butler-Cole"})
+WHERE NOT (t)-[:IN]->(c)
+WITH t.name AS city, size(collect(route)) as routes
+RETURN city, routes ORDER BY routes DESC LIMIT 10
+
+
+quHGXsaAW5at-fbsB84fi-H43uBgT42QqQ5vLwIm_XQ

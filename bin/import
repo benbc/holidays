@@ -16,20 +16,21 @@ docker run \
        --name=holidays \
        --volume="$(pwd)"/docker/data:/data \
        --volume="$(pwd)"/docker/import:/import \
-       neo4j:4.0 \
-       neo4j-admin import --ignore-extra-columns=true --bad-tolerance=0 \
-       --report-file=/data/import.report --skip-duplicate-nodes=true \
-       --skip-bad-relationships=true \
-       --nodes=Airport=/import/airports-header.dat,/import/airports.dat \
-       --relationships=FLIGHT=/import/routes-header.dat,/import/routes.dat
+       neo4j:3.5 \
+       neo4j-admin import --ignore-extra-columns=true \
+       --report-file=/data/import.report --ignore-duplicate-nodes=true \
+       --ignore-missing-nodes=true \
+       --nodes:Airport=/import/airports-header.dat,/import/airports.dat \
+       --relationships:FLIGHT=/import/routes-header.dat,/import/routes.dat
 
 docker run \
+       --rm \
        --detach \
        --name=holidays \
        --publish=7474:7474 --publish=7687:7687 \
        --volume="$(pwd)"/docker/data:/data \
        --env NEO4J_AUTH=none \
-       neo4j:4.0
+       neo4j:3.5
 
 while ! docker exec --interactive holidays bin/cypher-shell 'RETURN 1;'; do
     sleep 1
