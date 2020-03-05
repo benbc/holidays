@@ -2,5 +2,5 @@
 set -o pipefail -o errtrace -o errexit -o nounset
 shopt -s inherit_errexit
 
-docker stop holidays
+docker stop holidays || true
 docker run --rm --interactive --tty --volume "$(pwd)"/docker/data:/data neo4j:3.5 bin/neo4j-admin push-to-cloud --bolt-uri bolt+routing://f32f0aae.databases.neo4j.io --username=neo4j --password="${NEO4J_PASSWORD}"
