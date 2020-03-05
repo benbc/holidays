@@ -1,6 +1,8 @@
 What is a database?
-     Real-world examples
-     Different kinds
+     Real-world examples, different kinds
+         Library
+         Phone numbers
+         Climate records
 
 Graph database
      All about relationships
@@ -18,6 +20,7 @@ https://neo4j.com/docs/cypher-manual/current/
 
 CREATE (:Person {name: "Ben Butler-Cole", age: 44})
 MATCH (me:Person {name: "Ben Butler-Cole"}) RETURN me.age
+MATCH (p:Person) return p.name
 
      Check what towns people are from for duplicates (Derby, Uttoxeter, Burton okay)
 
@@ -81,6 +84,3 @@ MATCH route=(t:Town) -[:FLIGHT]-> (:Town) -[:IN]-> (c:Country) <-[:LIKES]-(me:Pe
 WHERE NOT (t)-[:IN]->(c)
 WITH t.name AS city, size(collect(route)) as routes
 RETURN city, routes ORDER BY routes DESC LIMIT 10
-
-
-quHGXsaAW5at-fbsB84fi-H43uBgT42QqQ5vLwIm_XQ
