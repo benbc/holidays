@@ -104,3 +104,5 @@ MATCH route=(t:Town) -[:FLIGHT]-> (:Town) -[:IN]-> (c:Country) <-[:LIKES]-(me:Pe
 WHERE NOT (t)-[:IN]->(c)
 WITH t.name AS city, size(collect(route)) as routes
 RETURN city, routes ORDER BY routes DESC LIMIT 10
+
+x
