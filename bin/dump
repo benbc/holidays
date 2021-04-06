@@ -2,7 +2,7 @@
 set -o pipefail -o errtrace -o errexit -o nounset
 shopt -s inherit_errexit
 
-docker stop holidays
+docker stop holidays || true
 
 docker run \
        --rm \

@@ -1,23 +1,39 @@
 What is a database?
-     Real-world examples, different kinds
-         Library
-         Phone numbers
-         Climate records
+     Computer program for storing and retrieving information
+     Lots of computer systems have databases at their core
+     Game engines
+          Unreal engine: UT, Fortnite, Deus Ex, Borderlands, Mass Effect
+
+Examples
+        Library
+        Contacts
+        Climate records
+        Websites?
+
+Different types of information
+          Structure of the data
+          How you retrieve it
+          Different types of data model
+          Different query languages, storage
 
 Graph database
      All about relationships
      Terminology (nodes, relationships)
      Examples of graphs
+              Road network
+              Delivery companies
+              Retail, Amazon recommendations
+              Disease
+     Add graphs to examples above
 
-Run Browser
+Neo4j
+        Run Browser
+        bit.ly/2PQFanl
 
 Simple graph building
      Draw everything as pictures on the board
      Keep glossary as you go
      Introduce Cypher patterns as ascii-art
-
-https://f32f0aae.databases.neo4j.io/browser/
-https://neo4j.com/docs/cypher-manual/current/
 
 CREATE (:Person {name: "Ben Butler-Cole", age: 44})
 MATCH (me:Person {name: "Ben Butler-Cole"}) RETURN me.age
@@ -67,6 +83,9 @@ CREATE (me)-[:LIKES]->(c)
 MATCH (me:Person {name: "Ben Butler-Cole"})-[:LIKES]->(c:Country)
 MATCH route = (:Town {name: "Manchester"})-[:FLIGHT*1..3]->(:Town)-[:IN]->(c)
 RETURN route ORDER BY length(route) LIMIT 6
+
+MATCH (:Person {name: "Ben Butler-Cole"})-[:LIKES]->(c1:Country)<-[:LIKES]-(p:Person)
+RETURN p.name
 
 MATCH (:Person {name: "Ben Butler-Cole"})-[:LIKES]->(c1:Country)<-[:LIKES]-(:Person)-[:LIKES]->(c2:Country)
 RETURN c2.name
